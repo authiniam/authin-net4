@@ -9,7 +9,7 @@
 
 ```
 Install-Package Newtonsoft.Json -Version 10.0.1
-Install-Package jose-jwt -Version 2.5.0
+Install-Package jose-jwt -Version 1.9.0
 ```
 <br/>
 <h2 dir="rtl">راهنمای استفاده از Authin.Api.Sdk در NET 4.0.</h2>
