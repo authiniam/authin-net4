@@ -3,7 +3,7 @@
 
 <h2 dir="rtl">راهنمای نصب Authin.Api.Sdk در NET 4.0.</h2>
 
-**<p dir="rtl">1. ابتدا کتابخانه <code>Authin.Api.Sdk.dll</code> را به رفرنس‌های پروژه خود اضفه کنید.</p>**
+**<p dir="rtl">1. ابتدا کتابخانه <code>Authin.Api.Sdk.dll</code> که در آدرس <a href="https://github.com/authiniam/authin-net4/tree/master/Authin.Api.Sdk/ReleaseFiles">Authin.Api.Sdk/ReleaseFiles/</a> وجود دارد را به رفرنس‌های پروژه خود اضافه کنید.</p>**
 
 **<p dir="rtl">2. <code>NuGet pacakge</code>های زیر را بر روی پروژه مقصد نصب کنید:</p>**
 
