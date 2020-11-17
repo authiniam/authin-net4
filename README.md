@@ -1,7 +1,7 @@
 **<h1 dir="rtl">authin-net4</h1>**
 <p dir="rtl">Authin Client SDK for .NET 4.0</p>
 
-<h2 dir="rtl">راهنمای نصب Authin.Api.Sdk در NET 4.0.</h2>
+<h2 dir="rtl">راهنمای نصب و استفاده از Authin.Api.Sdk در NET 4.0.</h2>
 
 **<p dir="rtl">1. ابتدا کتابخانه <code>Authin.Api.Sdk.dll</code> که در آدرس <a href="https://github.com/authiniam/authin-net4/tree/master/Authin.Api.Sdk/ReleaseFiles">Authin.Api.Sdk/ReleaseFiles/</a> وجود دارد را به رفرنس‌های پروژه خود اضافه کنید.</p>**
 
@@ -116,9 +116,11 @@ var decodedJwt = TokenValidator.Validate(
 <ul dir="rtl">
 	<li>جواب دریافتی شامل فقره‌های اطلاعاتی موجود در هر توکن می‌باشد. به طور مثال <code>scope</code>هایی که در مرحله ۱ درخواست داده شده‌اند در <code>access_token</code> هستند و یا <code>claim</code>هایی  که در مرحله ۱ در زیر بخش‌های شماره ۶ و ۷ اضافه شده‌اند را در تجزیه <code>id_token</code> دریافت خواهید کرد.
 	</li>
+    <li>عملیات صحت سنجی را برای تمامی توکن‌های دریافتی به صورت جداگانه انجام دهید.
+	</li>
 </ul>
 
-<blockquote dir="rtl"> توجه: به هیچ عنوان بدون صحت‌سنجی، توکن‌های دریافتی را استفاده نکنید. توکن‌ها به معنی اعتبارنامه دسترسی به سامانه شما هستند. </blockquote>
+<blockquote dir="rtl"> <strong>توجه</strong>: به هیچ عنوان بدون صحت‌سنجی، توکن‌های دریافتی را استفاده نکنید. توکن‌ها به معنی اعتبارنامه دسترسی به سامانه شما هستند. </blockquote>
 
 **<p dir="rtl">4. برای دریافت اطلاعات کاربر که درخواست آن را در مرحله ۱ در <code>scope</code>ها داده‌اید، به روش زیر عمل کنید:</p>**
 
@@ -137,3 +139,50 @@ var userInfoResult = userInfoTask.Result;
 	<li>نوع درخواست که می‌تواند <code>GET</code> یا <code>POST</code> باشد.</li>
 	<li><code>access_token</code> دریافتی در مرحله ۲.</li>
 </ol>
+
+**<p dir="rtl">5. فرآیند خروج کاربر:</p>**
+
+<p dir="rtl">فرآیند خروج کاربر به دو حالت زیر می‌تواند صورت پذیرد:</p>
+
+<ul dir="rtl">
+	<li>حالت اول: خروج از طریق سامانه احراز هویت مرکزی آتین<br/>
+     در این حالت پس از تکمیل فرآیند خروج در سامانه احراز هویت، یک درخواست از نوع <code>POST</code> به آدرس <code>backchannelLogoutUri</code> که در تنظیمات سامانه شما مشخص شده است،  به صورت زیر ارسال می‌شود.  پس از دریافت درخواست و استخراج <code>logout_token</code>، توکن مربوطه را به روشی که در بخش 3 توضیح داده شده است، صحت‌سنجی کنید. نیاز است تا در جواب درخواست وارد شده یکی از سه <code>status code</code> زیر را به عنوان پاسخ برگردانید:
+        <ul>
+            <li><code>200</code> در صورت موفقیت آمیز بودن خروج کاربر در سامانه شما</li>
+            <li><code>400</code> در صورتی که صحت‌سنجی توکن با موفقیت صورت نگیرد</li>
+            <li><code>501</code> در صورتی که به هر دلیل دیگری قادر به تکمیل فرآیند خروج کاربر در سامانه خود نشوید</li>
+        </ul>
+	</li>
+</ul>
+
+```bash
+curl --request POST \
+     --url '<backchannel_logout_uri>' \
+     --header 'content-type: application/x-www-form-urlencoded' \
+     --data 'logout_token="eyJxxxxxxxxxxiJ9.eyJxxxxxxxxxxIn0.rNjxxxxxxxxxxb1E"'
+```
+
+<ul dir="rtl">
+	<li>حالت دوم: خروج از طریق سامانه شما (<code>RP-Initiated Logout</code>)<br/> نیاز است به منظور خروج کاربر از سامانه احراز هویت و در نتیجه خروج از دیگر سامانه‌های مربوطه، پس از اینکه فرآیند خروج کاربر از سامانه شما انجام گرفت، کاربر را به آدرس صفحه خروج سامانه آتین هدایت کنید. این درخواست شامل پارامترهای زیر است:
+	</li>
+    <ul dir="rtl">
+        <li><code>id_token_hint:</code> یکی از <code>ID Token</code>های دریافتی از سامانه آتین مرتبط با نشست فعلی کاربر</li>
+        <li><code>post_logout_redirect_uri:</code> آدرس صفحه‌ای در سامانه شما، که پس از اتمام فرایند خروج، کاربر به آن صفحه هدایت می‌‌شود . لازم است این آدرس در سامانه آتین تعریف شده باشد.</li>
+        <li><code>state:</code> در صورت استفاده از <code>post_logout_redirect_uri</code> این مقدار عینا در پاسخ به سامانه شما بازمی‌گردد.</li>
+    </ul>
+</ul>
+
+
+<p dir="rtl">نمونه درخواست:</p>
+
+```
+https://<authin_idp_address>/logout?id_token_hint=YOUR_ID_TOKEN&post_logout_redirect_uri=YOUR_POST_LOGOUT_REDIRECT_URI&state=YOUR_STATE
+```
+
+<p dir="rtl">نمونه پاسخ:</p>
+
+```
+post_logout_redirect_uri?state=YOUR_STATE
+```
+
+<blockquote dir="rtl"> <strong>توجه:</strong> در صورتی که پارامتر  <code>id_token_hint</code> همراه درخواست ارسال نشود، فرآیند خروج کاربر به طور کامل <strong>اجرا می‌شود</strong> اما کاربر به آدرس <code>post_logout_redirect_uri</code> بازهدایت <strong>نخواهد شد</strong>.</blockquote>
