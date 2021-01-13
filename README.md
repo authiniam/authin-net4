@@ -3,7 +3,7 @@
 
 <h2 dir="rtl">راهنمای نصب و استفاده از Authin.Api.Sdk در NET 4.0.</h2>
 
-**<p dir="rtl">1. ابتدا کتابخانه <code>Authin.Api.Sdk.dll</code> که در آدرس <a href="https://github.com/authiniam/authin-net4/tree/master/Authin.Api.Sdk/ReleaseFiles">Authin.Api.Sdk/ReleaseFiles/</a> وجود دارد را به رفرنس‌های پروژه خود اضافه کنید.</p>**
+**<p dir="rtl">1. ابتدا کتابخانه <code>Authin.Api.Sdk.dll</code> که در <a href="https://github.com/authiniam/authin-net4/releases">releases</a> وجود دارد را به رفرنس‌های پروژه خود اضافه کنید.</p>**
 
 **<p dir="rtl">2. <code>NuGet pacakge</code>های زیر را بر روی پروژه مقصد نصب کنید:</p>**
 
@@ -21,19 +21,19 @@ Install-Package jose-jwt -Version 1.9.0
 
 ```csharp
 var authorizationRequest = AuthorizationCodeRequest.GetBuilder()
-    .SetBaseUrl("IAM_BASE_ADDRESS")                         (1)
-    .SetClientId("YOUR_CLIENT_ID")                          (2)
-    .SetRedirectUri("YOUR_REDIRECT_URI")                    (3)
-    .SetResponseType("code")                                (4)
-    .AddScopes(new List<string>() {"openid", "profile"})    (5)
-    .AddIdTokenClaim("username")                            (6)
-    .AddIdTokenClaim("lastname")                            (7)
-    .SetState("some_data")                                  (8)
-    .Build();
+	.SetBaseUrl("IAM_BASE_ADDRESS")                         (1)
+    	.SetClientId("YOUR_CLIENT_ID")                          (2)
+    	.SetRedirectUri("YOUR_REDIRECT_URI")                    (3)
+    	.SetResponseType("code")                                (4)
+    	.AddScopes(new List<string>() {"openid", "profile"})    (5)
+    	.AddIdTokenClaim("username")                            (6)
+    	.AddIdTokenClaim("lastname")                            (7)
+    	.SetState("some_data")                                  (8)
+    	.Build();
 
 var authorizationTask = authorizationRequest.Execute();
 authorizationTask.Start();
-var authorizationResult = authorizationTask.Result;         (9)
+var authorizationResult = authorizationTask.Result;         	(9)
 ```
 <ol dir="rtl">
 	<li>آدرس سامانه احراز هویت مثال:  <code>https://demo.authin.ir</code></li>
@@ -60,17 +60,17 @@ var authorizationResult = authorizationTask.Result;         (9)
 
 ```csharp
 var tokenRequest = TokenRequest.GetBuilder()
-		.SetBaseUrl("IAM_BASE_ADDRESS")
-		.SetClientId("YOUR_CLIENT_ID")          (1)
-		.SetClientSecret("YOUR_CLIENT_SECRET")  (2)
-		.SetRedirectUri("YOUR_REDIRECT_URI")    (3)
-		.SetGrantType("authorization_code")     (4)
-		.SetCode(code)                          (5)
-		.Build();
+	.SetBaseUrl("IAM_BASE_ADDRESS")
+	.SetClientId("YOUR_CLIENT_ID")          (1)
+	.SetClientSecret("YOUR_CLIENT_SECRET")  (2)
+	.SetRedirectUri("YOUR_REDIRECT_URI")    (3)
+	.SetGrantType("authorization_code")     (4)
+	.SetCode(code)                          (5)
+	.Build();
 
 var tokenTask = tokenRequest.Execute();
 tokenTask.Start();
-var tokenResult = tokenTask.Result;         (6)
+var tokenResult = tokenTask.Result;         	(6)
 ```
 <ol dir="rtl">
 	<li><code>client_id</code> سامانه شما در سامانه احراز هویت (این پارامتر را از ما دریافت می‌کنید)</li>
@@ -88,8 +88,8 @@ var tokenResult = tokenTask.Result;         (6)
 
 ```csharp
 var jwksRequest = JwksRequest.GetBuilder()
-		.SetBaseUrl("IAM_BASE_ADDRESS")
-		.Build();
+	.SetBaseUrl("IAM_BASE_ADDRESS")
+	.Build();
 
 var jwksTask = jwksRequest.Execute();
 jwksTask.Start();
@@ -100,10 +100,10 @@ var jwksResult = jwksTask.Result;
 
 ```csharp
 var decodedJwt = TokenValidator.Validate(
-			tokenResult.AccessToken,    (1)
-			jwksResult,                 (2)
-			"ISSUER",                   (3)
-			"AUDIENCE"                  (4)
+	tokenResult.AccessToken,    (1)
+	jwksResult,                 (2)
+	"ISSUER",                   (3)
+	"AUDIENCE"                  (4)
 );
 ```
 <ol dir="rtl">
@@ -121,15 +121,43 @@ var decodedJwt = TokenValidator.Validate(
 </ul>
 
 <blockquote dir="rtl"> <strong>توجه</strong>: به هیچ عنوان بدون صحت‌سنجی، توکن‌های دریافتی را استفاده نکنید. توکن‌ها به معنی اعتبارنامه دسترسی به سامانه شما هستند. </blockquote>
+<br/>
 
-**<p dir="rtl">4. برای دریافت اطلاعات کاربر که درخواست آن را در مرحله ۱ در <code>scope</code>ها داده‌اید، به روش زیر عمل کنید:</p>**
+**<p dir="rtl">4. پس  از اتمام فرایند احراز هویت یکی از توکن‌های دریافتی <code>refresh_token</code> است که سامانه شما با ارائه این توکن به سامانه احراز هویت آتین می‌تواند بدون مداخله کاربر توکن جدیدی دریافت کند. مکانیزم درخواست <code>refresh_token</code> بدین صورت است که در صورتی که عمر توکن فعلی کاربر به اتمام رسیده و توکن منقضی شده باشد،  سامانه شما با ارائه <code>refresh_token</code> دریافتی، توکن جدیدی را به دست می‌آورد.بدین منظور به روش زیر عمل کنید:</p>**
+
+```csharp
+var refreshTokenRequest = RefreshTokenRequest.GetBuilder()
+	.SetBaseUrl("IAM_BASE_ADDRESS")
+	.SetClientId("YOUR_CLIENT_ID")
+	.SetClientSecret("YOUR_CLIENT_SECRET")
+	.SetAccessToken(tokenResult.AccessToken)	(1)
+	.SetGrantType("refresh_token")=			(2)
+	.SetRefreshToken(tokenResult.RefreshToken)	(3)
+	.Build();
+
+var refreshTokenTask = tokenRequest.Execute();
+refreshTokenTask.Start();
+var refreshTokenResult = refreshTokenTask.Result;	(4)
+```
+<ol dir="rtl">
+	<li><code>access_token</code> دریافتی در مرحله ۲</li>
+	<li>این مقدار باید برابر با <code>refresh_token</code> باشد</li>
+	<li><code>refresh_token</code> دریافتی در مرحله ۲</li>
+	<li>جواب دریافتی شامل <code>access_token</code> و <code>id_token</code>های جدید همانند پاسخ مرحله 2 خواهد بود.</li>
+</ol>
+
+<blockquote dir="rtl">- لازم به ذکر است که به هنگام اجرای فرایند خروج از سامانه شما <code>refresh_token</code> نیز باید پاک شود.</blockquote>
+<blockquote dir="rtl">- فراموش نکنید که توکن‌های دریافتی در این مرحله نیز باید صحت‌سنجی شوند.</blockquote>
+</br>
+
+**<p dir="rtl">5. برای دریافت اطلاعات کاربر که درخواست آن را در مرحله ۱ در <code>scope</code>ها داده‌اید، به روش زیر عمل کنید:</p>**
 
 ```csharp
 var userInfoRequest = UserInfoRequest.GetBuilder()
-		.SetBaseUrl("IAM_BASE_ADDRESS")
-		.SetMethod(Method.Get)                      (1)
-		.SetAccessToken(tokenResult.AccessToken)    (2)
-		.Build();
+	.SetBaseUrl("IAM_BASE_ADDRESS")
+	.SetMethod(Method.Get)                      (1)
+	.SetAccessToken(tokenResult.AccessToken)    (2)
+	.Build();
 
 var userInfoTask = userInfoRequest.Execute();
 userInfoTask.Start();
@@ -139,8 +167,10 @@ var userInfoResult = userInfoTask.Result;
 	<li>نوع درخواست که می‌تواند <code>GET</code> یا <code>POST</code> باشد.</li>
 	<li><code>access_token</code> دریافتی در مرحله ۲.</li>
 </ol>
+<br/>
 
-**<p dir="rtl">5. فرآیند خروج کاربر:</p>**
+
+**<p dir="rtl">6. فرآیند خروج کاربر:</p>**
 
 <p dir="rtl">فرآیند خروج کاربر به دو حالت زیر می‌تواند صورت پذیرد:</p>
 
