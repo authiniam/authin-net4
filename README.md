@@ -33,7 +33,8 @@ var authorizationRequest = AuthorizationCodeRequest.GetBuilder()
 
 var authorizationTask = authorizationRequest.Execute();
 authorizationTask.Start();
-var authorizationResult = authorizationTask.Result;         	(9)
+var authorizationResult = authorizationTask.Result;
+var authorizationUri = authorizationResult.AbsoluteUri;		(9)
 ```
 <ol dir="rtl">
 	<li>آدرس سامانه احراز هویت مثال:  <code>https://demo.authin.ir</code></li>
